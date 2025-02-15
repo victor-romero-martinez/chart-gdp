@@ -1,0 +1,107 @@
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Char</title>
+      <style>
+        * {
+          box-sizing: border-box;
+          margin: 0;
+        }
+
+        body {
+          width: 100%;
+          height: 100dvh;
+          color: aliceblue;
+          background-color: rgb(38, 30, 61);
+          display: flex;
+          align-items: center;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        main {
+          margin: 0 auto;
+        }
+
+        h1 {
+          text-align: center;
+        }
+
+        /* svg {
+          border: 2px, solid, white;
+        } */
+      </style>
+    </head>
+    <body>
+      <main id="container">
+        <h1 id="title">United States GDP</h>
+        <div id="char"></div>
+      </main>
+      <script
+        type="module"
+        src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"
+      ></script>
+      <script type="module">
+        import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
+        const fetchData = await d3.json(
+          "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json"
+        );
+
+        const data = fetchData.data ?? [30, 80, 45, 60, 20, 90, 55];
+        // data.forEach((d) => console.log(d[1]));
+
+        const WIDTH = 640;
+        const HEIGHT = 400;
+        const MARGIN = 40;
+
+        const x = d3
+          .scaleBand()
+          .domain(data.map((d) => Number(d[0].split("-")[0])))
+          .range([MARGIN, WIDTH - MARGIN])
+          .padding(0.02);
+
+        const y = d3
+          .scaleLinear()
+          .domain([0, d3.max(data.map((d) => Number(d[1])))])
+          .nice()
+          .range([HEIGHT - MARGIN, MARGIN]);
+
+        const svg = d3.create("svg").attr("width", WIDTH).attr("height", HEIGHT);
+
+        svg
+          .append("g")
+          .attr("transform", `translate(0, ${HEIGHT - MARGIN})`)
+          .attr('id', 'x-axis')
+          .call(d3.axisBottom(x).tickFormat((d, _i) => (d % 5 === 0 ? d : "")));
+
+        svg
+          .append("g")
+          .attr("transform", `translate(${MARGIN}, 0)`)
+          .attr('id', 'y-axis')
+          .call(d3.axisLeft(y).tickFormat((d, _i) => (d % 2 === 0 ? d : "")));
+
+        svg
+          .append("g")
+          .attr("fill", "steelblue")
+          .selectAll("rect")
+          .data(data)
+          .enter()
+          .append("rect")
+          .attr("x", (d, i) => {
+            const [year, month, ...rest] = d[0].split("-")
+            // console.log(Number(year + month))
+            return x(Number(year + month))})
+          .attr("y", (d) => y(d[1]))
+          .attr("height", (d) => y(0) - y(d[1]))  
+          .attr("width", x.bandwidth())
+          .attr('data-date', (d) => d[0])
+          .attr('data-gdp', (d) => d[1])
+          .attr('index', (_d, i) => i)
+          .attr('class', 'bar');
+
+        char.append(svg.node());
+      </script>
+    </body>
+  </html>
