@@ -38,10 +38,6 @@
         <h1 id="title">United States GDP</h>
         <div id="char"></div>
       </main>
-      <script
-        type="module"
-        src="https://cdn.freecodecamp.org/testable-projects-fcc/v1/bundle.js"
-      ></script>
       <script type="module">
         import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
@@ -49,18 +45,20 @@
           "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json"
         );
 
-        const data = fetchData.data ?? [30, 80, 45, 60, 20, 90, 55];
+        const data = fetchData.data
         // data.forEach((d) => console.log(d[1]));
 
         const WIDTH = 640;
         const HEIGHT = 400;
         const MARGIN = 40;
 
+        const parseData = d3.timeParse('%Y-%m-%d')
+
         const x = d3
-          .scaleBand()
-          .domain(data.map((d) => Number(d[0].split("-")[0])))
+          .scaleTime()
+          .domain(d3.extent(data, d => parseData(d[0])))
           .range([MARGIN, WIDTH - MARGIN])
-          .padding(0.02);
+          // .padding(0.02);
 
         const y = d3
           .scaleLinear()
@@ -74,13 +72,16 @@
           .append("g")
           .attr("transform", `translate(0, ${HEIGHT - MARGIN})`)
           .attr('id', 'x-axis')
-          .call(d3.axisBottom(x).tickFormat((d, _i) => (d % 5 === 0 ? d : "")));
+          .call(d3.axisBottom(x)
+            .tickValues(x.ticks(d3.timeYear.every(5)))
+            .tickFormat(d3.timeFormat('%Y'))
+          );
 
         svg
           .append("g")
           .attr("transform", `translate(${MARGIN}, 0)`)
           .attr('id', 'y-axis')
-          .call(d3.axisLeft(y).tickFormat((d, _i) => (d % 2 === 0 ? d : "")));
+          .call(d3.axisLeft(y));
 
         svg
           .append("g")
@@ -89,13 +90,10 @@
           .data(data)
           .enter()
           .append("rect")
-          .attr("x", (d, i) => {
-            const [year, month, ...rest] = d[0].split("-")
-            // console.log(Number(year + month))
-            return x(Number(year + month))})
+          .attr("x", (d) => x(parseData(d[0])))
           .attr("y", (d) => y(d[1]))
           .attr("height", (d) => y(0) - y(d[1]))  
-          .attr("width", x.bandwidth())
+          .attr("width", WIDTH / data.length)
           .attr('data-date', (d) => d[0])
           .attr('data-gdp', (d) => d[1])
           .attr('index', (_d, i) => i)
