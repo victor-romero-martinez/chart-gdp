@@ -28,9 +28,13 @@
           text-align: center;
         }
 
-        /* svg {
-          border: 2px, solid, white;
-        } */
+        .bar {
+          cursor: pointer;
+        }
+
+        .bar:hover {
+          fill: rgb(98, 159, 209);
+        }
       </style>
     </head>
     <body>
@@ -58,7 +62,6 @@
           .scaleTime()
           .domain(d3.extent(data, d => parseData(d[0])))
           .range([MARGIN, WIDTH - MARGIN])
-          // .padding(0.02);
 
         const y = d3
           .scaleLinear()
@@ -67,6 +70,15 @@
           .range([HEIGHT - MARGIN, MARGIN]);
 
         const svg = d3.create("svg").attr("width", WIDTH).attr("height", HEIGHT);
+
+        svg.append("text")
+          .attr("x", -HEIGHT / 2 )
+          .attr("y", MARGIN + 20)
+          .attr('transform', 'rotate(-90)')
+          .style("font-size", "12px")
+          .style("font-family", "Arial")
+          .style("fill", "currentColor")
+          .text("Gross Domestic Product");
 
         svg
           .append("g")
